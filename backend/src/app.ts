@@ -7,7 +7,8 @@ import { errorHandler, notFound } from './middleware/error.js';
 import { authRouter } from './modules/auth/router.js';
 import { projectsRouter } from './modules/projects/router.js';
 import { tasksRouter } from './modules/tasks/router.js';
-import { membersRouter } from './modules/members/router.js';
+import { membersRouter, projectMembersRouter } from './modules/members/router.js';
+import { activityRouter } from './modules/activity/router.js';
 
 export function createApp() {
   const app = express();
@@ -29,6 +30,8 @@ export function createApp() {
   app.use('/api/v1/projects', projectsRouter);
   app.use('/api/v1/tasks', tasksRouter);
   app.use('/api/v1/members', membersRouter);
+  app.use('/api/v1/projects/:id/members', projectMembersRouter);
+  app.use('/api/v1/activity', activityRouter);
 
   app.use(notFound);
   app.use(errorHandler);

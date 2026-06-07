@@ -36,6 +36,35 @@ export interface Task {
   updated_at: string;
 }
 
+export interface Comment {
+  id: string;
+  task_id: string;
+  author_id: string;
+  author_name: string;
+  author_email: string;
+  body: string;
+  created_at: string;
+}
+
+export interface AttachmentMeta {
+  id: string;
+  task_id: string;
+  filename: string;
+  mime_type: string;
+  size_bytes: number;
+  uploaded_by_id: string;
+  uploader_name: string;
+  created_at: string;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
 export interface ApiOk<T> {
   success: true;
   data: T;

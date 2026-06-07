@@ -52,7 +52,7 @@ function buildUrl(path: string, query?: ApiOptions['query']): string {
   return `${path}${url.search}`;
 }
 
-async function requestRaw<T>(path: string, opts: ApiOptions = {}): Promise<ApiOk<T>> {
+export async function requestRaw<T>(path: string, opts: ApiOptions = {}): Promise<ApiOk<T>> {
   const headers: Record<string, string> = {};
   if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 

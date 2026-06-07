@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/DataTable';
@@ -39,7 +40,11 @@ export function TaskTable({
     {
       key: 'title',
       header: 'Title',
-      render: (t) => <span className="font-medium">{t.title}</span>,
+      render: (t) => (
+        <Link href={`/tasks/${t.id}`} className="font-medium hover:underline">
+          {t.title}
+        </Link>
+      ),
     },
     {
       key: 'assignee',

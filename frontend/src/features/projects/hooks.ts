@@ -22,14 +22,17 @@ export function useProject(id: string | undefined) {
   });
 }
 
+function invalidateAll(qc: ReturnType<typeof useQueryClient>) {
+  qc.invalidateQueries({ queryKey: ['projects'] });
+  qc.invalidateQueries({ queryKey: ['activity'] });
+  qc.invalidateQueries({ queryKey: ['analytics'] });
+}
+
 export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: ProjectInput) => api.createProject(input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['activity'] });
-    },
+    onSuccess: () => invalidateAll(qc),
   });
 }
 
@@ -37,10 +40,7 @@ export function useUpdateProject(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: Partial<ProjectInput>) => api.updateProject(id, input),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['activity'] });
-    },
+    onSuccess: () => invalidateAll(qc),
   });
 }
 
@@ -48,10 +48,7 @@ export function useDeleteProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.deleteProject(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['activity'] });
-    },
+    onSuccess: () => invalidateAll(qc),
   });
 }
 
@@ -59,9 +56,6 @@ export function useRestoreProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.restoreProject(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['projects'] });
-      qc.invalidateQueries({ queryKey: ['activity'] });
-    },
+    onSuccess: () => invalidateAll(qc),
   });
 }

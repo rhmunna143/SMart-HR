@@ -1,6 +1,7 @@
 import { ConflictError, ForbiddenError, NotFoundError } from '../../lib/errors.js';
 import { logActivity } from '../../lib/activity.js';
 import { getTeamMemberVisibility } from '../../lib/settings.js';
+import { insertNotification } from '../notifications/queries.js';
 import type { AuthUser, Task, TaskPriority, TaskStatus } from '../../types/index.js';
 import { findProjectById, userBelongsToProject } from '../projects/queries.js';
 import * as q from './queries.js';
@@ -82,6 +83,13 @@ export async function create(input: {
       entityId: task.id,
       message: `${user.email} created task "${task.title}"`,
     });
+    // Notify assignee (skip silently on error — non-blocking)
+    if (task.assignee_id && task.assignee_id !== user.id) {
+      insertNotification(
+        task.assignee_id,
+        `You were assigned to task "${task.title}"`,
+      ).catch(() => undefined);
+    }
     return task;
   } catch (err) {
     if (isUniqueViolation(err)) {
@@ -133,6 +141,13 @@ export async function update(id: string, patch: {
           ? `${user.email} assigned task "${updated.title}"`
           : `${user.email} unassigned task "${updated.title}"`,
       });
+      // Notify new assignee (skip silently on error)
+      if (patch.assignee_id && patch.assignee_id !== user.id) {
+        insertNotification(
+          patch.assignee_id,
+          `You were assigned to task "${updated.title}"`,
+        ).catch(() => undefined);
+      }
     }
     return updated;
   } catch (err) {

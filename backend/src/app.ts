@@ -9,6 +9,7 @@ import { projectsRouter } from './modules/projects/router.js';
 import { tasksRouter } from './modules/tasks/router.js';
 import { membersRouter, projectMembersRouter } from './modules/members/router.js';
 import { activityRouter } from './modules/activity/router.js';
+import { analyticsRouter } from './modules/analytics/router.js';
 
 export function createApp() {
   const app = express();
@@ -32,6 +33,7 @@ export function createApp() {
   app.use('/api/v1/members', membersRouter);
   app.use('/api/v1/projects/:id/members', projectMembersRouter);
   app.use('/api/v1/activity', activityRouter);
+  app.use('/api/v1/analytics', analyticsRouter);
 
   app.use(notFound);
   app.use(errorHandler);

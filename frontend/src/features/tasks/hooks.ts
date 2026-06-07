@@ -27,7 +27,11 @@ export function useCreateTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: TaskInput) => api.createTask(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['activity'] });
+      qc.invalidateQueries({ queryKey: ['members', 'overview'] });
+    },
   });
 }
 
@@ -35,7 +39,11 @@ export function useUpdateTask(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: Partial<Omit<TaskInput, 'project_id'>>) => api.updateTask(id, input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['activity'] });
+      qc.invalidateQueries({ queryKey: ['members', 'overview'] });
+    },
   });
 }
 
@@ -44,7 +52,11 @@ export function useUpdateTaskStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: TaskStatus }) =>
       api.updateTaskStatus(id, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['activity'] });
+      qc.invalidateQueries({ queryKey: ['members', 'overview'] });
+    },
   });
 }
 
@@ -52,7 +64,11 @@ export function useDeleteTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.deleteTask(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['activity'] });
+      qc.invalidateQueries({ queryKey: ['members', 'overview'] });
+    },
   });
 }
 
@@ -60,6 +76,10 @@ export function useRestoreTask() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.restoreTask(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['activity'] });
+      qc.invalidateQueries({ queryKey: ['members', 'overview'] });
+    },
   });
 }

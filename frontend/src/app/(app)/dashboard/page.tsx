@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ActivityFeed } from '@/features/activity/ActivityFeed';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -10,17 +11,28 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Welcome back, {user?.name}</h1>
         <p className="text-sm text-muted-foreground">
-          KPIs, recent activity, and charts will appear here once M4 ships.
+          KPI cards and charts arrive in M4. The activity feed below updates as you and your team
+          work.
         </p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Foundation ready</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Auth, RBAC, and the DB schema are wired up. Projects and tasks ship in M2.
-        </CardContent>
-      </Card>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick links</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Jump into <span className="font-medium">Projects</span> to create or manage projects,{' '}
+              <span className="font-medium">Tasks</span> for the global task board, or{' '}
+              <span className="font-medium">Members</span> for workload across your team.
+            </CardContent>
+          </Card>
+        </div>
+        <div className="lg:col-span-1">
+          <ActivityFeed limit={10} />
+        </div>
+      </div>
     </div>
   );
 }

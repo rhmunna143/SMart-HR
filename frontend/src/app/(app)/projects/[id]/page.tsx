@@ -19,6 +19,7 @@ import {
   useUpdateTaskStatus,
 } from '@/features/tasks/hooks';
 import { useMembers } from '@/features/members/hooks';
+import { ProjectMembersCard } from '@/features/members/ProjectMembersCard';
 import { useAuth } from '@/lib/auth';
 import { canManageProjects, canManageTasks } from '@/lib/permissions';
 import { ApiError } from '@/lib/api';
@@ -124,29 +125,32 @@ export default function ProjectDetailPage({ params }: PageProps) {
         )}
       </div>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
-          <div>
-            <p className="text-xs text-muted-foreground">Deadline</p>
-            <p className={isOverdue(project.deadline, project.status) ? 'text-red-600 font-medium' : ''}>
-              {formatDate(project.deadline)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Created</p>
-            <p>{formatDate(project.created_at)}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Last updated</p>
-            <p>{formatDate(project.updated_at)}</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Deadline</p>
+              <p className={isOverdue(project.deadline, project.status) ? 'text-red-600 font-medium' : ''}>
+                {formatDate(project.deadline)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Created</p>
+              <p>{formatDate(project.created_at)}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Last updated</p>
+              <p>{formatDate(project.updated_at)}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <ProjectMembersCard projectId={project.id} canManage={canManageProj} />
+      </div>
 
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-lg font-semibold">Tasks</h2>

@@ -52,7 +52,7 @@ function buildUrl(path: string, query?: ApiOptions['query']): string {
   return `${path}${url.search}`;
 }
 
-async function request<T>(path: string, opts: ApiOptions = {}): Promise<T> {
+async function requestRaw<T>(path: string, opts: ApiOptions = {}): Promise<ApiOk<T>> {
   const headers: Record<string, string> = {};
   if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
@@ -76,7 +76,7 @@ async function request<T>(path: string, opts: ApiOptions = {}): Promise<T> {
   if (res.status === 401 && !opts._retried && !path.startsWith('/auth/')) {
     const refreshed = await tryRefresh();
     if (refreshed) {
-      return request<T>(path, { ...opts, _retried: true });
+      return requestRaw<T>(path, { ...opts, _retried: true });
     }
     if (onUnauthorized) onUnauthorized();
   }
@@ -92,7 +92,12 @@ async function request<T>(path: string, opts: ApiOptions = {}): Promise<T> {
     const err = payload as ApiErr;
     throw new ApiError(res.status, err.message ?? `Request failed (${res.status})`, err.errors);
   }
-  return (payload as ApiOk<T>).data;
+  return payload as ApiOk<T>;
+}
+
+async function request<T>(path: string, opts: ApiOptions = {}): Promise<T> {
+  const envelope = await requestRaw<T>(path, opts);
+  return envelope.data;
 }
 
 let refreshInFlight: Promise<boolean> | null = null;
@@ -121,9 +126,33 @@ async function tryRefresh(): Promise<boolean> {
   return refreshInFlight;
 }
 
+export interface PageMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export const api = {
   get: <T>(path: string, opts?: Omit<ApiOptions, 'method' | 'body' | 'formData'>) =>
     request<T>(path, { ...opts, method: 'GET' }),
+  /** Like `get`, but also returns `meta` (used for paginated lists). */
+  getList: async <T>(
+    path: string,
+    opts?: Omit<ApiOptions, 'method' | 'body' | 'formData'>,
+  ): Promise<{ data: T; meta: PageMeta }> => {
+    const envelope = await requestRaw<T>(path, { ...opts, method: 'GET' });
+    const meta = (envelope.meta ?? {}) as Partial<PageMeta>;
+    return {
+      data: envelope.data,
+      meta: {
+        page: meta.page ?? 1,
+        limit: meta.limit ?? 20,
+        total: meta.total ?? 0,
+        totalPages: meta.totalPages ?? 1,
+      },
+    };
+  },
   post: <T>(path: string, body?: unknown, opts?: Omit<ApiOptions, 'method' | 'body'>) =>
     request<T>(path, { ...opts, method: 'POST', body }),
   patch: <T>(path: string, body?: unknown, opts?: Omit<ApiOptions, 'method' | 'body'>) =>

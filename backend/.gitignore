@@ -1,5 +1,7 @@
 node_modules
 dist
+# esbuild Vercel bundle (generated at deploy time — never commit)
+api/index.cjs
 .env
 .env.local
 *.log

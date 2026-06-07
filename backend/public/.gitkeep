@@ -1,0 +1,6 @@
+# Intentionally (almost) empty.
+#
+# Vercel runs the `vercel-build` script (esbuild -> api/index.cjs) and then,
+# because no framework is detected, expects a static "Output Directory".
+# This `public/` folder satisfies that check. No static assets are served --
+# the `rewrites` in vercel.json send every request to the api/index function.

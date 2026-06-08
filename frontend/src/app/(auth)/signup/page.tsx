@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth';
 import { ApiError } from '@/lib/api';
+import { Logo } from '@/components/Logo';
 
 interface SignupForm {
   name: string;
@@ -58,7 +59,8 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-muted/40 px-4">
+      <Logo markClassName="h-10 w-10" className="gap-3 [&_span]:text-2xl" />
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Create your account</CardTitle>

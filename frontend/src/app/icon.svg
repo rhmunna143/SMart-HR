@@ -1,0 +1,16 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shGrad" x1="48" y1="48" x2="464" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#shGrad)"/>
+  <!-- Task list bars -->
+  <rect x="150" y="158" width="150" height="34" rx="17" fill="white" fill-opacity="0.45"/>
+  <rect x="150" y="320" width="150" height="34" rx="17" fill="white" fill-opacity="0.45"/>
+  <!-- Completed checkmark -->
+  <path d="M150 256 L196 302 L300 198" stroke="white" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Accent dot -->
+  <circle cx="356" cy="256" r="26" fill="white"/>
+</svg>

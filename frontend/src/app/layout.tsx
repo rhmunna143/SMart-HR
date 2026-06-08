@@ -18,7 +18,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Smart HR',
+  title: {
+    default: 'Smart HR',
+    template: '%s · Smart HR',
+  },
   description: 'Project & task collaboration for teams',
 };
 

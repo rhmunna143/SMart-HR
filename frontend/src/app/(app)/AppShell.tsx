@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUnreadCount } from '@/features/notifications/hooks';
+import { Logo } from '@/components/Logo';
 
 const NAV = [
   { href: '/dashboard',      label: 'Dashboard',     icon: LayoutDashboard },
@@ -68,9 +69,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="grid min-h-screen grid-cols-[240px_1fr] bg-muted/30">
       <aside className="flex flex-col border-r bg-background px-4 py-6">
         <div className="mb-6 flex items-center justify-between px-2">
-          <div>
-            <p className="text-lg font-semibold">Smart HR</p>
-            <p className="text-xs text-muted-foreground">{user.role.replace(/_/g, ' ')}</p>
+          <div className="flex flex-col gap-1">
+            <Logo />
+            <p className="pl-[42px] text-xs text-muted-foreground">
+              {user.role.replace(/_/g, ' ')}
+            </p>
           </div>
           <ThemeToggle />
         </div>

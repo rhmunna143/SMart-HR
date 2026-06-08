@@ -1,6 +1,6 @@
 import type { ApiErr, ApiOk } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
 
 let accessToken: string | null = null;
 let onUnauthorized: (() => void) | null = null;

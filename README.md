@@ -1,94 +1,218 @@
 # Smart HR — Project & Task Collaboration
 
-Full-stack web app for managing projects, tasks, members, comments, attachments, activity, and dashboards with strict server-side validation and RBAC.
+A full-stack team productivity app — manage projects, tasks, members, comments, and file attachments with role-based access control, a live dashboard, dark mode, and in-app notifications.
 
-- **Frontend:** Next.js 16 (App Router) + TypeScript + Tailwind v4 + shadcn/ui + TanStack Query + react-hook-form + Recharts.
-- **Backend:** Express 5 + TypeScript, raw SQL via `pg` (no ORM), JWT auth.
-- **Database:** PostgreSQL (Neon recommended).
-- **Migrations:** `node-pg-migrate` over plain `.sql` files.
-- **Deployment:** Both apps to Vercel; backend as a Fluid Compute Function.
+**🌐 Live demo** → [smart-hr-six.vercel.app](https://smart-hr-six.vercel.app)  
+**🔌 API** → [smart-hr-backend-kappa.vercel.app](https://smart-hr-backend-kappa.vercel.app/api/v1/health)
 
-## Repo layout
+---
 
-```
-backend/   Express API (deploys as a Vercel Function via api/index.ts)
-frontend/  Next.js app
-```
+## Features
 
-## Local setup
+- **RBAC** — Admin / Project Manager / Team Member with enforced server-side rules
+- **Projects & Tasks** — full CRUD, soft-delete & restore, status workflow, priority levels
+- **Dashboard** — KPI cards, task-by-status donut, activity sparklines (Recharts)
+- **Comments & Attachments** — threaded comments and file uploads up to 5 MB (stored as BYTEA)
+- **Notifications** — in-app bell with unread badge, polled every 30 s
+- **Activity feed** — every mutation is logged and surfaced in the dashboard
+- **Dark mode** — system-aware toggle, persisted via `next-themes`
+- **Admin settings** — toggle Team Member visibility (`ASSIGNED_ONLY` ↔ `ALL`)
+- **JWT auth** — 15-min access token + 7-day refresh token in an `httpOnly` cookie
 
-### Prerequisites
-- Node.js 20+ (project tested on 25.x)
-- A Postgres database. Easiest: a free Neon project (https://neon.tech). The connection string ends with `?sslmode=require`.
+---
 
-### 1. Backend
+## Tech stack
 
-```bash
-cd backend
-cp .env.example .env       # fill in DATABASE_URL + JWT secrets
-npm install
-npm run migrate:up         # creates schema in your Postgres
-npm run db:seed            # inserts demo users + projects + tasks
-npm run dev                # http://localhost:4000
-```
+| Layer | Stack |
+|-------|-------|
+| **Frontend** | Next.js 16 (App Router) · TypeScript · Tailwind v4 · shadcn/ui · TanStack Query · react-hook-form · Recharts |
+| **Backend** | Express 5 · TypeScript · raw SQL via `pg` (no ORM) · JWT |
+| **Database** | PostgreSQL on [Neon](https://neon.tech) |
+| **Deploy** | Vercel — two projects, one repo |
 
-### 2. Frontend
-
-```bash
-cd frontend
-# .env.local already has NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
-npm install                # (already done if scaffold completed)
-npm run dev                # http://localhost:3000
-```
-
-Open http://localhost:3000 and click **Use demo account** to sign in as the admin.
+---
 
 ## Demo credentials
 
-| Role            | Email               | Password   |
-|-----------------|---------------------|------------|
-| Admin           | admin@demo.test     | Admin@123  |
-| Project Manager | pm@demo.test        | Pm@12345   |
-| Team Member 1   | member1@demo.test   | Member@1   |
-| Team Member 2   | member2@demo.test   | Member@2   |
+> Hit **Use demo account** on the login page to sign in as Admin without typing a password.
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@demo.test` | `Admin@123` |
+| Project Manager | `pm@demo.test` | `Pm@12345` |
+| Team Member 1 | `member1@demo.test` | `Member@1` |
+| Team Member 2 | `member2@demo.test` | `Member@2` |
+
+---
+
+## Local development
+
+### Prerequisites
+
+- Node.js 20+
+- A PostgreSQL database — easiest: a free [Neon](https://neon.tech) project  
+  *(connection string ends with `?sslmode=require`)*
+
+### Backend
+
+```bash
+cd backend
+cp .env.example .env        # fill in DATABASE_URL + JWT secrets
+npm install
+npm run migrate:up          # runs db/migrations/001_init.sql
+npm run db:seed             # inserts demo users, projects, tasks
+npm run dev                 # http://localhost:4000
+```
+
+```bash
+curl http://localhost:4000/api/v1/health
+# → { "success": true, "data": { "ok": true } }
+```
+
+### Frontend
+
+```bash
+cd frontend
+# .env.local points NEXT_PUBLIC_API_URL at localhost:4000 by default
+npm install
+npm run dev                 # http://localhost:3000
+```
+
+Open [http://localhost:3000](http://localhost:3000) and click **Use demo account**.
+
+---
+
+## Deploying to Vercel
+
+Two separate Vercel projects from the same repo, each with a different **Root Directory**.
+
+### 1 · Database
+
+Create a free [Neon](https://neon.tech) project and copy the **Pooled** connection string  
+(`postgresql://…?sslmode=require`). Alternatively, add Neon directly from the Vercel Marketplace — it auto-provisions `DATABASE_URL`.
+
+### 2 · Backend project
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | `backend` |
+| Framework Preset | *Other* (leave blank) |
+
+**Environment variables** (Settings → Environment Variables):
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | Neon pooled connection string |
+| `JWT_ACCESS_SECRET` | Random 64-char hex — `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `JWT_REFRESH_SECRET` | A *different* random 64-char hex string |
+| `CORS_ORIGIN` | Your frontend URL (add after Step 3, then redeploy) |
+
+**Run migrations after the first successful deploy:**
+
+```bash
+DATABASE_URL="<neon-url>" npm run migrate:up   # from backend/
+DATABASE_URL="<neon-url>" npm run db:seed
+```
+
+### 3 · Frontend project
+
+| Setting | Value |
+|---------|-------|
+| Root Directory | `frontend` |
+| Framework Preset | *Next.js* (auto-detected) |
+
+**Environment variables:**
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_API_URL` | `https://<your-backend>.vercel.app/api/v1` |
+
+### 4 · Wire CORS
+
+Back in the **backend** Vercel project, set `CORS_ORIGIN` to your frontend URL and redeploy.
+
+### 5 · Verify
+
+```
+https://<frontend>.vercel.app  →  login  →  dashboard KPIs load  ✓
+```
+
+---
 
 ## Environment variables
 
-**Backend (`backend/.env`)**
+### Backend (`backend/.env`)
 
-| Key                  | Notes                                                  |
-|----------------------|--------------------------------------------------------|
-| `DATABASE_URL`       | Postgres connection string                             |
-| `JWT_ACCESS_SECRET`  | Long random string                                     |
-| `JWT_REFRESH_SECRET` | Different long random string                           |
-| `ACCESS_TOKEN_TTL`   | e.g. `15m` (default)                                   |
-| `REFRESH_TOKEN_TTL`  | e.g. `7d` (default)                                    |
-| `CORS_ORIGIN`        | Frontend URL (default `http://localhost:3000`)         |
-| `PORT`               | Default `4000`                                         |
-| `MAX_ATTACHMENT_BYTES` | Max upload size in bytes (default `5242880` = 5 MB)  |
+| Variable | Required | Default | Notes |
+|----------|:--------:|---------|-------|
+| `DATABASE_URL` | ✅ | — | Postgres connection string with `?sslmode=require` |
+| `JWT_ACCESS_SECRET` | ✅ | — | Random secret for access tokens |
+| `JWT_REFRESH_SECRET` | ✅ | — | Random secret for refresh tokens (different from above) |
+| `CORS_ORIGIN` | | `http://localhost:3000` | Frontend URL; comma-separate multiple origins |
+| `ACCESS_TOKEN_TTL` | | `15m` | |
+| `REFRESH_TOKEN_TTL` | | `7d` | |
+| `PORT` | | `4000` | Local dev only — Vercel ignores this |
+| `MAX_ATTACHMENT_BYTES` | | `5242880` | 5 MB file-upload cap |
 
-**Frontend (`frontend/.env.local`)**
+### Frontend (`frontend/.env.local`)
 
-| Key                   | Notes                                       |
-|-----------------------|---------------------------------------------|
-| `NEXT_PUBLIC_API_URL` | Backend base URL, e.g. `…/api/v1`           |
+| Variable | Required | Notes |
+|----------|:--------:|-------|
+| `NEXT_PUBLIC_API_URL` | ✅ | Full backend URL including `/api/v1` |
 
-## Roadmap
+---
 
-| Phase | Scope                                                                                  | Status |
-|-------|----------------------------------------------------------------------------------------|--------|
-| M1    | Repo scaffold, SQL migrations, auth + RBAC, demo login                                 | done   |
-| M2    | Projects + Tasks CRUD + validation rules + soft-delete                                 |        |
-| M3    | Members, assignment, workload, activity log                                            |        |
-| M4    | Dashboard KPIs + charts + search/filter/sort/pagination                                |        |
-| M5    | Comments, attachments, notifications, dark mode, settings page                         |        |
-| M6    | Deploy to Vercel + Neon                                                                |        |
+## RBAC
 
-## Deployment (preview)
+| Permission | Admin | PM | Team Member |
+|-----------|:-----:|:--:|:-----------:|
+| Create / delete projects | ✅ | ✅ | — |
+| Create / delete tasks | ✅ | ✅ | — |
+| Manage project members | ✅ | ✅ | — |
+| Comment & upload files | ✅ | ✅ | ✅ |
+| Change visibility setting | ✅ | — | — |
+| View all projects & tasks | ✅ | ✅ | Setting-dependent |
 
-Two Vercel projects pointed at the one repo:
+**Team Member visibility** (Admin → Settings):
+- `ASSIGNED_ONLY` — TMs see only projects/tasks assigned to them
+- `ALL` — TMs see everything (read-only on projects)
 
-- `smart-hr-api` — root `backend/`. Vercel detects `api/index.ts` and runs the Express app as a single Fluid Compute Function. Set `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGIN` (the frontend URL).
-- `smart-hr-web` — root `frontend/`. Set `NEXT_PUBLIC_API_URL` to the api project's URL + `/api/v1`.
+---
 
-Neon is the recommended Postgres — install it via the Vercel Marketplace and the `DATABASE_URL` is provisioned into the api project's env automatically.
+## Project structure
+
+```
+SMart HR/
+├── backend/
+│   ├── api/index.ts               # Vercel Function entry — exports Express app
+│   ├── db/
+│   │   ├── migrations/001_init.sql
+│   │   ├── seed.ts
+│   │   └── pool.ts
+│   └── src/
+│       ├── config/env.ts
+│       ├── lib/                   # query · validate · errors · jwt · paginate · response
+│       ├── middleware/            # auth · rbac · error · validate
+│       └── modules/
+│           ├── auth/              # signup · login · demo-login · refresh · me · logout
+│           ├── projects/          # CRUD · soft-delete · restore
+│           ├── tasks/             # CRUD · status workflow · soft-delete · restore
+│           ├── members/           # membership · workload
+│           ├── comments/          # threaded task comments
+│           ├── attachments/       # upload/download · BYTEA · 5 MB cap
+│           ├── activity/          # audit log feed
+│           ├── analytics/         # dashboard KPIs + chart aggregations
+│           ├── notifications/     # in-app notifications · unread count
+│           └── settings/          # admin visibility toggle
+│
+└── frontend/
+    └── src/
+        ├── app/
+        │   ├── (auth)/            # login · signup
+        │   └── (app)/             # dashboard · projects · tasks · members
+        │       │                  # notifications · settings
+        │       └── AppShell.tsx   # sidebar · topbar · RBAC-aware nav
+        ├── components/            # DataTable · KpiCard · StatusBadge · ConfirmDialog · Logo
+        ├── features/              # per-feature api.ts + hooks.ts + components
+        └── lib/                   # fetch client · auth context · TanStack Query
+```
